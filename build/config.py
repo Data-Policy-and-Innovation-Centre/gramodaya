@@ -19,7 +19,9 @@ user_paths = {
 # Check if the current user is defined in the user_paths dictionary
 # Raise an error if the user is not found
 if user_name not in user_paths:
-    raise ValueError(f"User '{user_name}' not found in user_paths. Please add your paths.")
+    raise ValueError(
+        f"User '{user_name}' not found in user_paths. Please add your paths."
+    )
 
 # Extract the user's specific paths based on the username
 box_path = user_paths[user_name]["box_path"]
@@ -34,6 +36,11 @@ paths = {
     "output_path": os.path.join(box_path, "Output"),
 }
 
+# Create directories if they don't exist
+for path in paths.values():
+    if not os.path.exists(path):
+        os.makedirs(path)
+
 # Define a dictionary of packages where keys are package names
 # and values are their common aliases
 packages = {
@@ -41,20 +48,36 @@ packages = {
     "pandas": "pd",
     "matplotlib": "mpl",
     "seaborn": "sns",
+    "pyarrow": None,
+    "polars": "pl",
+    "ydata_profiling": "ydata_profiling",
 }
+
 
 def run_command(command):
     """Run a shell command and handle errors."""
     # Print the command that will be executed
     print(f"> Running: {' '.join(command)}")
     # Execute the command and capture the output and errors
-    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    result = subprocess.run(
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
     # Check if the command was successful
     if result.returncode != 0:
         # Print the error message if the command failed
         print(f"Error running: {' '.join(command)}\n{result.stderr}")
         # Raise an exception with the error details
         raise RuntimeError(f"Command failed: {' '.join(command)}")
+
+
+def ensure_piptools():
+    """Ensure that pip-tools is installed."""
+    try:
+        import piptools  # noqa: F401
+    except ImportError:
+        print("> pip-tools not found. Installing...")
+        run_command([sys.executable, "-m", "pip", "install", "--upgrade", "pip-tools"])
+
 
 def clear_cache():
     """Clear cached files and pip cache."""
@@ -81,25 +104,47 @@ def uninstall_packages():
         # Uninstall the package using pip
         run_command([sys.executable, "-m", "pip", "uninstall", "-y", package])
 
+
 def generate_requirements():
     """Generate and install dependencies from requirements.in."""
     # Indicate the start of generating the requirements file
     print("> Generating requirements file...")
-    # Open the requirements.in file in write mode
+
+    # Ensure pip-tools is installed before using it
+    ensure_piptools()
+
     with open(os.path.join(github_path, "requirements.in"), "w") as file:
         # Write each package name to the file
         file.write("\n".join(packages.keys()) + "\n")
 
     # Use piptools to compile the requirements.in file into requirements.txt
-    run_command([
-        sys.executable, "-m", "piptools", "compile", "--output-file",
-        os.path.join(github_path, "requirements.txt"), os.path.join(github_path, "requirements.in")
-    ])
+    run_command(
+        [
+            sys.executable,
+            "-m",
+            "piptools",
+            "compile",
+            "--output-file",
+            os.path.join(github_path, "requirements.txt"),
+            os.path.join(github_path, "requirements.in"),
+        ]
+    )
     # Install the packages listed in requirements.txt
-    run_command([
-        sys.executable, "-m", "pip", "install", "-r", os.path.join(github_path, "requirements.txt"),
-        "--no-cache-dir", "--prefer-binary", "--upgrade-strategy", "only-if-needed"
-    ])
+    run_command(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "-r",
+            os.path.join(github_path, "requirements.txt"),
+            "--no-cache-dir",
+            "--prefer-binary",
+            "--upgrade-strategy",
+            "only-if-needed",
+        ]
+    )
+
 
 if __name__ == "__main__":
     # Clear cache and uninstall packages (optional)
@@ -111,4 +156,3 @@ if __name__ == "__main__":
     generate_requirements()
     # Indicate that all packages have been installed and imported successfully
     print("> All packages installed and imported successfully!")
-
