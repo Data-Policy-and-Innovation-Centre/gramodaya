@@ -6,7 +6,7 @@
 #
 annotated-types==0.7.0
     # via pydantic
-attrs==25.1.0
+attrs==25.2.0
     # via visions
 certifi==2025.1.31
     # via requests
@@ -96,6 +96,8 @@ pillow==11.1.0
     #   wordcloud
 polars==1.24.0
     # via -r C:/Users/Admin/OneDrive - University of Chicago IIC/Desktop/gramodaya\requirements.in
+puremagic==1.28
+    # via visions
 pyarrow==19.0.1
     # via -r C:/Users/Admin/OneDrive - University of Chicago IIC/Desktop/gramodaya\requirements.in
 pydantic==2.10.6
@@ -116,7 +118,7 @@ pyyaml==6.0.2
     # via ydata-profiling
 requests==2.32.3
     # via ydata-profiling
-scipy==1.13.1
+scipy==1.15.2
     # via
     #   imagehash
     #   phik
@@ -143,9 +145,9 @@ tzdata==2025.1
     # via pandas
 urllib3==2.3.0
     # via requests
-visions[type-image-path]==0.7.6
+visions[type-image-path]==0.8.1
     # via ydata-profiling
 wordcloud==1.9.4
     # via ydata-profiling
-ydata-profiling==4.13.0
+ydata-profiling==4.14.0
     # via -r C:/Users/Admin/OneDrive - University of Chicago IIC/Desktop/gramodaya\requirements.in
