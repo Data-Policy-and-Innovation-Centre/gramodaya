@@ -186,27 +186,35 @@ def split_and_save_by_department(
     for dept, abbr_list in dept_abbr_map.items():
         dept_df = df.filter(pl.col(dept_name_col) == dept).drop(dept_name_col)
         if dept_df.height > 0:
-            chosen_abbr = (
-                "scst" if dept == "ST & SC Dev Department" else random.choice(abbr_list)
-            )
-            output_file = os.path.join(output_path, f"{chosen_abbr}_benefits.csv")
+            # Handle SC & ST Dev Department specifically
+            if dept == "ST & SC Dev Department":
+                chosen_abbr = "scst"  # Force consistent abbreviation
+                # Include all prefixes for column selection
+                prefixes = [f"{abbr}_" for abbr in abbr_list]
+                dept_specific_cols = [
+                    col
+                    for col in dept_df.columns
+                    if any(col.startswith(prefix) for prefix in prefixes)
+                ]
+            else:
+                chosen_abbr = random.choice(abbr_list)
+                prefix = f"{chosen_abbr}_"
+                dept_specific_cols = [
+                    col for col in dept_df.columns if col.startswith(prefix)
+                ]
 
-            # Select appropriate columns
-            prefix = chosen_abbr + "_"
-            dept_specific_cols = [
-                col for col in dept_df.columns if col.startswith(prefix)
-            ]
+            # Select relevant columns and save
             relevant_cols = [
                 col
                 for col in common_cols + dept_specific_cols
                 if col in dept_df.columns
             ]
-
+            output_file = os.path.join(output_path, f"{chosen_abbr}_benefits.csv")
             dept_df.select(relevant_cols).unique().write_csv(output_file)
             department_files[chosen_abbr] = output_file
             log_message(f"Saved {dept} data to {output_file}")
 
-    return department_files  # Return mapping of abbreviations to file paths
+    return department_files
 
 
 dept_prefixes = {abbr for abbr_list in dept_abbr.values() for abbr in abbr_list}
@@ -376,22 +384,14 @@ def merge_department_data(department_files, unique_id):
     for dept_abbr, file_path in department_files.items():
         df = pl.read_csv(file_path)
 
-        # Create department-specific column list with prefixes
+        # Collect department-specific columns (already prefixed)
         dept_specific = [
-            f"{dept_abbr}_{col}"
-            for col in df.columns
-            if col not in common_columns and col != unique_id
+            col for col in df.columns if col not in common_columns and col != unique_id
         ]
 
-        # Rename columns and maintain processing order
+        # Maintain column order: unique_id, common_columns, dept_specific
         current_cols = [unique_id] + list(common_columns) + dept_specific
-        df = df.rename(
-            {
-                col: f"{dept_abbr}_{col}"
-                for col in df.columns
-                if col not in common_columns and col != unique_id
-            }
-        ).select(current_cols)
+        df = df.select(current_cols)
 
         # Add new department-specific columns to global order
         column_order.extend([col for col in dept_specific if col not in column_order])
@@ -548,27 +548,35 @@ def split_and_save_by_department(
     for dept, abbr_list in dept_abbr_map.items():
         dept_df = df.filter(pl.col(dept_name_col) == dept).drop(dept_name_col)
         if dept_df.height > 0:
-            chosen_abbr = (
-                "scst" if dept == "ST & SC Dev Department" else random.choice(abbr_list)
-            )
-            output_file = os.path.join(output_path, f"{chosen_abbr}_benefits.csv")
+            # Handle SC & ST Dev Department specifically
+            if dept == "ST & SC Dev Department":
+                chosen_abbr = "scst"  # Force consistent abbreviation
+                # Include all prefixes for column selection
+                prefixes = [f"{abbr}_" for abbr in abbr_list]
+                dept_specific_cols = [
+                    col
+                    for col in dept_df.columns
+                    if any(col.startswith(prefix) for prefix in prefixes)
+                ]
+            else:
+                chosen_abbr = random.choice(abbr_list)
+                prefix = f"{chosen_abbr}_"
+                dept_specific_cols = [
+                    col for col in dept_df.columns if col.startswith(prefix)
+                ]
 
-            # Select appropriate columns
-            prefix = chosen_abbr + "_"
-            dept_specific_cols = [
-                col for col in dept_df.columns if col.startswith(prefix)
-            ]
+            # Select relevant columns and save
             relevant_cols = [
                 col
                 for col in common_cols + dept_specific_cols
                 if col in dept_df.columns
             ]
-
+            output_file = os.path.join(output_path, f"{chosen_abbr}_benefits.csv")
             dept_df.select(relevant_cols).unique().write_csv(output_file)
             department_files[chosen_abbr] = output_file
             log_message(f"Saved {dept} data to {output_file}")
 
-    return department_files  # Return mapping of abbreviations to file paths
+    return department_files
 
 
 # Split and save village department data
@@ -738,22 +746,14 @@ def merge_department_data(department_files, unique_id):
     for dept_abbr, file_path in department_files.items():
         df = pl.read_csv(file_path)
 
-        # Create department-specific column list with prefixes
+        # Collect department-specific columns (already prefixed)
         dept_specific = [
-            f"{dept_abbr}_{col}"
-            for col in df.columns
-            if col not in common_columns and col != unique_id
+            col for col in df.columns if col not in common_columns and col != unique_id
         ]
 
-        # Rename columns and maintain processing order
+        # Maintain column order: unique_id, common_columns, dept_specific
         current_cols = [unique_id] + list(common_columns) + dept_specific
-        df = df.rename(
-            {
-                col: f"{dept_abbr}_{col}"
-                for col in df.columns
-                if col not in common_columns and col != unique_id
-            }
-        ).select(current_cols)
+        df = df.select(current_cols)
 
         # Add new department-specific columns to global order
         column_order.extend([col for col in dept_specific if col not in column_order])
