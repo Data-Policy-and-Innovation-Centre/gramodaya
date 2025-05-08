@@ -34,11 +34,11 @@ global data_temp "$process_data/Temp"
 global data_cleaned "$box/9. Cleaned Data/gramodaya"
 
 // ERASE TEMP ------------------------------------------------------------------
-cd "$data_temp"
-local files : dir . files *
+local files : dir "$data_temp" files "*"
 foreach file of local files {
-	rm `file'
+    rm "$data_temp/`file'"
 }
+
 clear
 
 // Install Necessary Packages---------------------------------------------------
