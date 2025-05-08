@@ -28,8 +28,8 @@ else if c(username) == "Admin" { // Admin refers to aastha
 
 // FILE PATHS ------------------------------------------------------------------
 global code "$github/Code"
-global raw_data "$box/7. Raw Data - Working/gramodaya/HH Wise Data17-4-25"
-global process_data "$box/8. Analysis/gramodaya" 
+global raw_data "$box/7. Raw Data - Working/gramodaya"
+global process_data "$box/8. Analysis/gramodaya"
 global data_temp "$process_data/Temp"
 global data_cleaned "$box/9. Cleaned Data/gramodaya"
 
