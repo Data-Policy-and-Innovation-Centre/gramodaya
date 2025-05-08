@@ -177,10 +177,10 @@ foreach var of varlist _all {
 }
 
 ***************************************************************
-* 7. Sort the Data by District, Block, Village, and Panchayat
+* 7. Sort the Data by District, Block, Village, and Panchayat and Drop Duplicates
 ***************************************************************
 sort district_name block_name panchayat_name village_name
-
+duplicates drop 
 ***************************************************************
 * 8. Save the Cleaned Dataset
 ***************************************************************
