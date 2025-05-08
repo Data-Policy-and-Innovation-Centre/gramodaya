@@ -1,4 +1,10 @@
-cd "$raw_data"
+// 0. Boilerplate and Import configuration
+collect clear
+
+do "0_setup_master.do"
+
+//Cleaning Setup File Paths
+global hh_wise "$raw_data/HH Wise Data 29-5-25"
 
 ***************************************************************
 * 1. Import CSVs and append to master file 
