@@ -40,49 +40,41 @@ import hashlib
 import pyreadstat
 
 def hash_data(series):
-    return series.astype(str).apply(lambda x: hashlib.md5(x.encode()).hexdigest() if x and x != 'nan' else None)
+    return series.astype(str).apply(lambda x: hashlib.sha256(x.encode()).hexdigest() if pd.notna(x) and str(x).strip().lower() != 'nan' else None)
 
 df, meta = pyreadstat.read_dta(r"`combined'")
 
-if 'aadhar_no' in df.columns:
-    df['hashed_aadhar'] = hash_data(df['aadhar_no'])
+columns_to_hash = {
+    'aadhar_no' : 'hashed_aadhar',
+    'ration_card_no' : 'hashed_ration_card'
+    'father_husband_name' : 'hashed_father_husband_name',
+    'beneficiary_name' :'enocded_beneficiary_name',
+    'village_name'  : 'encoded_village_name',
+    'block_name' : 'encoded_block_name',
+    'district_name' : 'encoded_district_name',
+}
 
-if 'ration_card_no' in df.columns:
-    df['hashed_ration_card'] = hash_data(df['ration_card_no'])
+for col, new_col in columns_to_hash.items(): 
+    if col in df.columns:
+        df[new_col] = sha256_encode(df[col])
 
-# Save updated file
-pyreadstat.write_dta(df, r"`combined'")
+    pyreadstat.write_dta(df, r"`combined'")
+
 end
 
-use `combined', clear
-
 ***************************************************************
-* 3. Remove Columns with 'Specify' in their Name
+* 3. Standardize Missing Values to ""
 ***************************************************************
-
-ds *specify*
-foreach var of varlist `r(varlist)' {
-    drop `var'
+ds 
+local found 0
+foreach var of varlist `rvarlist'{
+    if "`var'" == "occupation" { 
+        local found 1 
+        continue 
 }
 
-***************************************************************
-* 4. Standardize Missing Values to "\N"
-***************************************************************
+if `found' == 1 {
 
-ds, has(type string)
-foreach var of varlist `r(varlist)' {
-    replace `var' = "\N" if trim(`var') == "" | `var' == "."
-}
-
-//Renaming variables to remove spaces and special characters
-local filename : subinstr local file ".csv" ""  // Remove .csv extension
-local prefix : word 1 of `filename'  // First word as prefix
-local prefix = lower("`prefix'")  // Convert to lowercase for consistency
-local prefix : subinstr local prefix " " "_", all  // Replace spaces with underscores
-
-**Rename each variable with the prefix and shorten the name
-ds
-foreach var of varlist `r(varlist)' {
 * Clean variable name (lowercase, replace spaces and special characters)
         local newvar = lower("`var'")
         local newvar : subinstr local newvar " " "_", all
@@ -104,33 +96,19 @@ foreach var of varlist `r(varlist)' {
         * Add the prefix to the cleaned variable name
         local newvar = "`prefix'_" + "`newvar'"
 
-        * Truncate if variable name is too long for Stata
-        if length("`newvar'") > 32 {
-            local newvar = substr("`newvar'", 1, 32)
-        }
-
         * Only rename if it’s different from the original
         if ("`var'" != "`newvar'") {
             capture rename `var' `newvar'
         }
     }
-***************************************************************
-* 6. Standardize Missing Values (All Variables)
-***************************************************************
-foreach var of varlist _all {
-    * Only replace missing values if the variable is not a string variable
-    if !missing(`var') & !strvar(`var') {
-        replace `var' = "\N" if missing(`var')
-    }
-}
 
 ***************************************************************
-* 7. Sort the Data by District, Block, Village, and Panchayat and Drop Duplicates
+* 4. Sort the Data by District, Block, Village, and Panchayat and Drop Duplicates
 ***************************************************************
 sort district_name block_name panchayat_name village_name
 duplicates drop 
 ***************************************************************
-* 8. Save the Cleaned Dataset
+* 5. Save the Cleaned Dataset
 ***************************************************************
 save "$data_cleaned/clean_gramodaya_beneficiary.dta", replace
 
