@@ -13,7 +13,7 @@ foreach file of local files {
     di "Processing: `file'"
     
     // Import file
-    import delimited using `"${raw_data}//`file'"', clear stringcols(_all)
+    import delimited using `"${raw_data}/`file'"', clear stringcols(_all)
     
     // Standardize variable names and values
     rename *, lower
