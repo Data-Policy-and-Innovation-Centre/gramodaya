@@ -19,7 +19,7 @@ foreach file of local files {
     rename *, lower
     ds, has(type string)
     foreach var of varlist `r(varlist)' {
-        replace `var' = lower(`var')
+        replace `var' = lower(trim(`var'))
     }
 
     // First file: save and continue
@@ -34,43 +34,67 @@ foreach file of local files {
         // Use the first 8 variables (common variables for merging)
         local common_vars district_id district_name block_id block_name panchayat_id panchayat_name village_id village_name
 
-        use `combined', clear
-        // Ensure the common variables are present in both datasets before merging
-        foreach var of local common_vars {
-            capture confirm variable `var'
-            if _rc {
-                di as error "`var' not found in `combined'. Exiting merge."
-                exit
-            }
-        }
+    
+   use `combined', clear
+        quietly duplicates drop `common_vars', force
+        save `combined', replace
 
         use `addvars', clear
-        foreach var of local common_vars {
-            capture confirm variable `var'
-            if _rc {
-                di as error "`var' not found in `addvars'. Exiting merge."
-                exit
-            }
-        }
-
-        // De-duplicate using dataset based on common variables
         quietly duplicates drop `common_vars', force
-
         save `addvars', replace
+
         use `combined', clear
-
-        // Also de-duplicate master to be safe
-        quietly duplicates drop `common_vars', force
-
-        // Merge using the common variables
-        di "Merging on: `common_vars'"
         merge 1:1 `common_vars' using `addvars', nogenerate
         save `combined', replace
     }
 }
-// Sort 
+
+// Load merged data
+use `combined', clear
+
+// Replace empty strings with "\n"
+ds, has(type string)
+foreach var of varlist `r(varlist)' {
+    replace `var' = "\n" if trim(`var') == ""
+}
+
+// List of variables expected to be purely numeric
+local numeric_vars ///
+    nooffunctionalsolarpumpsavailabl ///
+    numberofhouseholdprovidedpipewat ///
+    numberoffunctionaltoilet ///
+    numberofstudentsenrolledinreside ///
+    maninpositionanganwadiworkers ///
+    maninpositionanganwadihelpers ///
+    healthworkerspositioninthehealth ///
+    v14 ///
+    numberoffunctionaltubewell ///
+    numberoffunctionaltoilet ///
+    teacherspositionsanction ///
+    teacherspresentposition ///
+	theroadbelongsto ///
+	availabilityofconcreteroadslengt ///
+
+
+// Clean and convert to numeric if needed
+foreach var of local numeric_vars {
+    capture confirm variable `var'
+    if !_rc {
+        capture confirm string variable `var'
+        if !_rc {
+            // If string: remove non-numerics
+            replace `var' = "\n" if !regexm(trim(`var'), "^-?[0-9]+(\.[0-9]*)?$")
+            destring `var', replace ignore("\n") force
+        }
+        else {
+            // Already numeric, do nothing
+        }
+    }
+}
+// Remove duplicates
+duplicates drop
 sort `common_vars'
 
 // 4. Final Save
 use `combined', clear
-save "$data_cleaned/merged_community_data.dta", replace
+save "$cleaneddata/gramodaya_community_data.dta", replace
