@@ -56,7 +56,7 @@ if (length(temp_files_to_delete) > 0) {
 }
 
 # *Load necessary packages
-packages <- c("data.table", "haven", "languageserver", "dplyr", "readr", "stringr", "purrr")
+packages <- c("data.table", "haven", "languageserver", "dplyr", "readr", "stringr", "purrr", "janitor")
 lapply(packages, function(pkg) {
     if (!require(pkg, character.only = TRUE)) {
         install.packages(pkg, dependencies = TRUE)
@@ -146,16 +146,17 @@ merge_one_to_one <- function(dt1, dt2, by_cols) {
 
 # Merge all data.tables strictly one-to-one
 if (length(hh_) == 0) {
-    merged_hh <- data.table()
+    merged_hh_clean <- data.table()
 } else {
-    merged_hh <- hh_[[1]]
+    merged_hh_clean <- hh_[[1]]
     for (i in 2:length(hh_)) {
-        merged_hh <- merge_one_to_one(merged_hh, hh_[[i]], common_columns)
+        merged_hh_clean <- merge_one_to_one(merged_hh_clean, hh_[[i]], common_columns)
     }
 }
 
 rm(list = ls(pattern = "^hh_"))
 
-merged_hh <- merged_hh %>%
+merged_hh_clean <- merged_hh_clean %>%
     rename_with(tolower) %>%
-    rename_with(~ str_replace_all(., " ", "_"))
+    janitor::clean_names(case = "snake") %>%
+    mutate(across(everything(), ~ gsub("\\\\N", "", as.character(.))))
