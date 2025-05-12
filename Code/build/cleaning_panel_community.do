@@ -69,43 +69,6 @@ foreach file of local files {
     }
 }
 
-// 4. Standardize Missing Values to ""
-ds
-local found 0
-foreach var of varlist `rvarlist' {
-    if "`var'" == "village_name" { 
-        local found 1 
-        continue 
-    }
-
-    if `found' == 1 {
-        // Clean variable name (lowercase, replace spaces and special characters)
-        local newvar = lower("`var'")
-        local newvar : subinstr local newvar " " "_", all
-        local newvar : subinstr local newvar "-" "_", all
-        local newvar : subinstr local newvar "(" "", all
-        local newvar : subinstr local newvar ")" "", all
-        local newvar : subinstr local newvar "/" "_", all
-        local newvar : subinstr local newvar "," "", all
-        local newvar : subinstr local newvar "__" "_", all
-
-        // Trim trailing or leading underscores
-        while substr("`newvar'", 1, 1) == "_" {
-            local newvar = substr("`newvar'", 2, .)
-        }
-        while substr("`newvar'", -1, 1) == "_" {
-            local newvar = substr("`newvar'", 1, length("`newvar'") - 1)
-        }
-
-        // Add the prefix to the cleaned variable name
-        local newvar = "`prefix'_" + "`newvar'"
-
-        // Only rename if it’s different from the original
-        if ("`var'" != "`newvar'") {
-            capture rename `var' `newvar'
-        }
-    }
-}
 // 4. Final Save
 use `combined', clear
 save "$data_cleaned/merged_community_data.dta", replace
