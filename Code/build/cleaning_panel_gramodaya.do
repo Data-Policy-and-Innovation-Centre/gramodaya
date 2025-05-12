@@ -7,7 +7,7 @@ do "0_setup_master.do"
 global hh_wise "$raw_data/HH Wise Data 29-5-25"
 
 ***************************************************************
-* 1. Import CSVs and append to master file 
+* 1. Import CSVs 
 ***************************************************************
 tempfile combined
 local first = 1 
@@ -107,6 +107,21 @@ if `found' == 1 {
 ***************************************************************
 sort district_name block_name panchayat_name village_name
 duplicates drop 
+
+5. Drop Inaccurate Age 
+
+    // Make all string variables lowercase
+    ds, has(type string)
+    foreach var of varlist `r(varlist)' {
+        replace `var' = lower(`var')
+    }
+
+    // Remove observations with implausible age
+    capture confirm variable age
+    if !_rc {
+        destring age, replace ignore("., ")
+        drop if age > 120
+    }
 ***************************************************************
 * 5. Save the Cleaned Dataset
 ***************************************************************
