@@ -68,6 +68,8 @@ foreach file of local files {
         save `combined', replace
     }
 }
+// Sort 
+sort `common_vars'
 
 // 4. Final Save
 use `combined', clear
