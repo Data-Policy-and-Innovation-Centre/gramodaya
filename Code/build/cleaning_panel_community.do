@@ -91,9 +91,41 @@ foreach var of local numeric_vars {
         }
     }
 }
+
+// Additional Cleaning Steps
+// Drop the 'v11' column
+drop v11
+
+// Rename 'v14' as 'subcentres_pp'
+rename v14 subcentres_pp
+
+// Drop the 'paramilitaryandpoliceservice' and 'requirementofconcreteroadslength' columns
+drop paramilitaryandpoliceservice requirementofconcreteroadslength
+
+// Replace all instances of "--select--" with missing values (.)
+
+replace ownrentalbuilding = trim(ownrentalbuilding)
+drop if ownrentalbuilding == "--select--"
+
+replace drinkingwaterfacility = trim(drinkingwaterfacility)
+drop if drinkingwaterfacility == "--select--"
+
+replace toiletfacility = trim(toiletfacility)
+drop if toiletfacility == "--select--"
+
+replace electrified = trim(electrified)
+drop if electrified == "--select--"
+
+replace kitchenfacility = trim(kitchenfacility)
+drop if kitchenfacility == "--select--"
+
+replace lpgconnection = trim(lpgconnection)
+drop if lpgconnection == "--select--"
+
 // Remove duplicates
 duplicates drop
 sort `common_vars'
+
 
 // 4. Final Save
 use `combined', clear
