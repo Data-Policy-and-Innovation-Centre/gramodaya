@@ -52,12 +52,6 @@ foreach file of local files {
 // Load merged data
 use `combined', clear
 
-// Replace empty strings with "\n"
-ds, has(type string)
-foreach var of varlist `r(varlist)' {
-    replace `var' = "\n" if trim(`var') == ""
-}
-
 // List of variables expected to be purely numeric
 local numeric_vars ///
     nooffunctionalsolarpumpsavailabl ///
@@ -126,7 +120,14 @@ drop if lpgconnection == "--select--"
 duplicates drop
 sort `common_vars'
 
-
+// Replace empty strings with "\n"
+ds, has(type string)
+foreach var of varlist `r(varlist)' {
+    replace `var' = "\n" if trim(`var') == ""
+}
 // 4. Final Save
 use `combined', clear
 save "$cleaneddata/gramodaya_community_data.dta", replace
+
+//Summarizing Dataset Using R 
+"`RSOURCE_PATH'" $Rterm_options "$code/summary_report.R"
