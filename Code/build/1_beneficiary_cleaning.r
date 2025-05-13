@@ -1,4 +1,33 @@
 # Beneficiary data cleaning
+
+# ====================================================================
+# Script Name: beneficiary_data_cleaning.R
+# Author: Nikilesh Anusha
+# Last Updated: May 13, 2025
+# Description:
+# This script performs comprehensive loading, cleaning, merging, and profiling
+# of household-wise beneficiary data from multiple departments. The key steps
+# include:
+#
+# 0. Boilerplate setup: Loads dependencies and sets the working environment.
+# 1. Load beneficiary CSVs: Reads all CSVs in a specified folder, names them
+#    dynamically, and loads them as data.tables into the global environment.
+# 2. Extract common columns: Identifies common columns across all loaded data.tables
+#    to enable safe merging.
+# 3. Merge data.tables one-to-one: Performs strict one-to-one merges across all
+#    beneficiary data.tables using common columns.
+# 4. Hash PII fields: Hashes personally identifiable information (PII) using SHA-256
+#    to anonymize sensitive fields such as name, Aadhar number, etc.
+# 5. Rename columns: Applies consistent and descriptive names to variables for
+#    clarity and downstream analysis.
+# 6. Generate profile: Produces a detailed HTML summary report of the cleaned
+#    and merged beneficiary dataset using the `summarytools` package.
+#
+# Output:
+# - A cleaned and merged `merge_ben` data.table saved to `data_cleaned_path/ben_cleaned.csv`.
+# - An HTML data profile summary saved to `output_path/ben_profile.html`.
+# ====================================================================
+
 ## 0. Boilerplate -----------------------------------------------------------------
 source(file.path(dirname(rstudioapi::getActiveDocumentContext()$path), "0_setup_r.r"))
 
@@ -162,7 +191,11 @@ renames <- c(
 
 names(merge_ben)[20:85] <- renames
 
-# 6. Data Profile ------------------------------------------------------------------
+# 6. Save Cleaned Data ------------------------------------------------------------------
+# Save the cleaned beneficiary data to a CSV file
+write.csv(merge_ben, file.path(data_cleaned_path, "ben_cleaned.csv"), row.names = FALSE)
+
+# 7. Data Profile ------------------------------------------------------------------
 # Generate a detailed summary report of the merged beneficiary data
 #' @description This section generates and saves a comprehensive summary profile of the beneficiary data post cleaning.
 #' It utilizes the 'summarytools' package to create a visual HTML report.
