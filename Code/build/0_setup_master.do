@@ -23,7 +23,7 @@ else if c(username) == "Admin" { // Admin refers to aastha
     global box "C:/Users/Admin/Box/11. PR&DW"
 	global RSOURCE_PATH "C:/Program Files/R/R-4.3.2/bin/Rscript"
     global Rterm_options `"--vanilla"'
-	global github "C:/Users/Admin/OneDrive - University of Chicago IIC/Desktop/gramodaya"
+	global github "C:/Users/Admin/Desktop/Gramodaya/gramodaya"
 }
 
 // FILE PATHS ------------------------------------------------------------------
