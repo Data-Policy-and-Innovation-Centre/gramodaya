@@ -64,9 +64,23 @@ if (file.exists(file_to_source)) {
   stop(paste("Required setup file not found:", file_to_source))
 }
 
-# --- Load and clean data ---
+# --- Load data ---
 df <- read_dta(file.path(box_path, "9. Cleaned Data", "gramodaya_community_data.dta"))
 
+# --- Extract variable names and labels ---
+var_labels <- attributes(df)$variable.labels
+
+# Create a data frame with variable names and their labels
+label_df <- data.frame(
+  variable_name = names(var_labels),
+  label = var_labels,
+  stringsAsFactors = FALSE
+)
+
+# Print the variable names and labels to the console
+print(label_df)
+
+# --- Data cleaning ---
 df <- df %>%
   rename_with(tolower) %>%
   janitor::clean_names(case = "snake") %>%
