@@ -109,7 +109,7 @@ duplicates drop
 sort district_id district_name block_id block_name panchayat_id panchayat_name village_id village_name
 
 // 8. Save final cleaned dataset
-save `"C:/Users/Admin/Box/11. PR&DW/9. Cleaned Data/gramodaya_community_data.dta"', replace
+save `"C:/Users/Admin/Box/11. PR&DW/9. Cleaned Data/gramodaya/community_cleaned.dta"', replace
 
 
 // 9. Run R script for summary report
