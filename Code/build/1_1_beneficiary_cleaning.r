@@ -3,7 +3,7 @@
 # ====================================================================
 # Script Name: 1_beneficiary_data_cleaning.R
 # Author: Nikilesh Anusha
-# Last Updated: May 14, 2025
+# Last Updated: May 19, 2025
 # Description:
 # This script performs comprehensive loading, cleaning, merging, and profiling
 # of household-wise beneficiary data from multiple departments. The key steps
@@ -33,8 +33,9 @@
 # Works in RStudio, when sourced, and when run with Rscript (--file=)
 # Falls back to the current working directory if the script path can't be determined.
 get_current_script_dir <- function() {
-    initial_wd <- getwd() # Capture the initial working directory
+    initial_wd <- getwd()
 
+    # 1. Try RStudio API
     if (requireNamespace("rstudioapi", quietly = TRUE) && rstudioapi::isAvailable()) {
         tryCatch(
             {
@@ -44,48 +45,37 @@ get_current_script_dir <- function() {
                     return(dirname(path))
                 }
             },
-            error = function(e) {
-                # Ignore errors if rstudioapi fails for some reason
-            }
+            error = function(e) {}
         )
     }
 
     # 2. Try parent frames (works well when the script is 'sourced')
-    # Look up the call stack for a frame that has a 'fileName' attribute.
-    # This often points to the file being evaluated by source().
     for (i in sys.nframe():1) {
         frame <- sys.frame(i)
         if (!is.null(frame$fileName) && frame$fileName != "") {
             script_path <- frame$fileName
-            # Resolve relative path if necessary, assuming relative to initial WD
             if (!grepl("^(/|[A-Za-z]:/)", script_path) && !file.exists(script_path)) {
                 script_path <- file.path(initial_wd, script_path)
             }
-            # Only return if the resolved path actually exists as a file
             if (file.exists(script_path)) {
                 message("Detected script path using parent frames.")
-                return(dirname(normalizePath(script_path))) # Return normalized absolute path dir
+                return(dirname(normalizePath(script_path)))
             }
         }
     }
 
     # 3. Try commandArgs (works for Rscript and R --file)
     args <- commandArgs(trailingOnly = FALSE)
-    # Look for --file= argument (standard way R passes the script path)
     file_arg_match <- grep("--file=", args)
     if (length(file_arg_match) > 0) {
-        script_path <- substring(args[file_arg_match[1]], 8) # 8 is nchar("--file=") + 1
+        script_path <- substring(args[file_arg_match[1]], 8)
         if (file.exists(script_path)) {
             message("Detected script path using commandArgs('--file=').")
             return(dirname(normalizePath(script_path)))
         }
     }
-    # Less reliable: check the second argument (might be the script name with Rscript)
-    # This can be ambiguous if other arguments are passed before the script name
     if (length(args) >= 2) {
         script_path <- args[2]
-        # Heuristic: Does it look like a script name and exist?
-        # Try resolving relative to initial WD as Rscript might be called from elsewhere
         if (!grepl("^(/|[A-Za-z]:/)", script_path) && !file.exists(script_path)) {
             script_path_relative <- file.path(initial_wd, script_path)
             if (file.exists(script_path_relative)) {
@@ -98,27 +88,35 @@ get_current_script_dir <- function() {
         }
     }
 
-    # 4. Fallback: If none of the above worked, use the current working directory
-    # This happens if you run code interactively by copy-pasting, or in complex scenarios.
+    # 4. Fallback: Current working directory
     warning("Could not determine the script file path precisely. Falling back to the initial working directory.")
-    return(initial_wd) # Use the initial WD as the most stable fallback
+    return(initial_wd)
 }
 
-# Determine the directory of the script that is executing *this* code
+# 1. Get the directory of the *current* script (your_script.R)
 current_script_dir <- get_current_script_dir()
+message(paste("Current script directory detected as:", current_script_dir))
 
-# Construct the full path to the file to source
-file_to_source <- file.path(current_script_dir, "0_setup_r.r")
+# 2. Navigate from the current script's directory up one level (to the parent folder)
+#    and then down into the 'global_setups' folder.
+#    file.path handles the '/' or '\' separators correctly across operating systems.
+#    '..' is the standard way to represent the parent directory.
+global_setups_dir <- file.path(current_script_dir, "..", "global_setups")
+message(paste("Attempting to locate global_setups directory at:", global_setups_dir))
 
-# Check if the file exists before sourcing
-if (file.exists(file_to_source)) {
-    message(paste("Sourcing setup file:", file_to_source))
-    # source() the file. Consider adding chdir = TRUE if 0_setup_r.r
-    # expects the working directory to be set to its location.
-    source(file_to_source)
+# 3. Construct the full path to the setup file
+setup_file_path <- file.path(global_setups_dir, "0_setup_r.r")
+message(paste("Attempting to source file:", setup_file_path))
+
+# 4. Check if the file exists and source it
+if (file.exists(setup_file_path)) {
+    message("File found. Sourcing...")
+    # Use source() to execute the file
+    source(setup_file_path, chdir = FALSE) # Set chdir=TRUE if needed by 0_setup_r.r
+    message("Sourcing complete.")
 } else {
-    # Handle the case where the file isn't found
-    warning(paste("Could not find the file to source:", file_to_source))
+    # Handle the case where the setup file is not found
+    warning(paste("Setup file not found at:", setup_file_path))
 }
 
 # 1. Load beneficiary data------------------------------------------------------------------
