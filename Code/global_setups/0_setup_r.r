@@ -60,7 +60,7 @@ if (length(temp_files_to_delete) > 0) {
 # *Load necessary packages
 packages <- c(
     "data.table", "haven", "languageserver", "dplyr", "readr", "stringr", "purrr", "janitor", "digest",
-    "summarytools"
+    "summarytools" # add more packages as needed
 )
 
 lapply(packages, function(pkg) {
