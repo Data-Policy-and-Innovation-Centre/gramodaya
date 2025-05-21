@@ -10,9 +10,9 @@ username <- Sys.info()["user"]
 
 # *Store all user-specific settings in a list
 user_settings <- list(
-    Nikil = list(
-        box = "C:/Users/Admin/Box/2. Projects/11. PR&DW",
-        github = "C:/Users/Admin/OneDrive - University of Chicago IIC/Desktop/gramodaya"
+    nikileshanusha = list(
+        box = "/Users/nikileshanusha/Library/CloudStorage/Box-Box/2. Projects/11. PR&DW",
+        github = "/Users/nikileshanusha/repositories/gramodaya"
     ),
     Admin = list( # Admin refers to aastha
         box = "C:/Users/Admin/Box/11. PR&DW",
@@ -56,10 +56,11 @@ if (length(temp_files_to_delete) > 0) {
     message("Temp directory is empty. No files to remove.")
 }
 
+# Note: XQuartz is required for macOS. install XQuartz from https://www.xquartz.org/
 # *Load necessary packages
 packages <- c(
     "data.table", "haven", "languageserver", "dplyr", "readr", "stringr", "purrr", "janitor", "digest",
-    "funModeling", "summarytools"
+    "summarytools" # add more packages as needed
 )
 
 lapply(packages, function(pkg) {
