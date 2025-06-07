@@ -172,3 +172,9 @@ common_cols <- find_common_columns()
 print(common_cols)
 
 final <- merge_long_and_normal()
+final[final == "\\N"] <- NA
+final[final == "--select--"] <- NA
+
+write.csv(final, "C:/Users/Admin/Box/11. PR&DW/9. Cleaned Data/gramodaya/community_cleaned.csv", row.names = FALSE)
+
+source("$code/build/community_summary.r") 
