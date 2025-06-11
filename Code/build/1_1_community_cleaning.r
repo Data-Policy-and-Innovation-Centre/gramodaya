@@ -223,7 +223,7 @@ final <- final %>%
         q46_ENV_allweather_forest_road = `Availability.of.all.weather.connectivity.within.forest.connecting.habitation.and.village`,
         q47_HE_agniveer_coaching = `Is.there.any.Coaching.Camp.for.Agniveer`
     ) %>%
-    select(-`type.of.bus.facility`, -`then.specify.the.Bank.Name`, -`Paramilitary.and.Police.Service`) %>%
+    select(-`type.of.bus.facility`, -`then.specify.the.Bank.Name`, -`Paramilitary.and.Police.Service`, -`then.provide.company.name`, -`then.specify.Bank.Name`, -`the.Road.Belongs.to`) %>%
     mutate(across(c(
         q15_AGRI_solar_pumps,
         q21_HLTH_health_workers_sanctioned,
