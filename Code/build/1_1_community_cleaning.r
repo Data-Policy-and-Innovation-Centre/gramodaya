@@ -70,7 +70,8 @@ if (file.exists(setup_file_path)) {
     warning(paste("Setup file not found at:", setup_file_path))
 }
 
-community_path <- "C:/Users/Admin/Box/2. Projects/11. PR&DW/7. Raw Data - Working/gramodaya/gramoday data on 06.06.2025/Community Data Village wise -29-4-25"
+community_path <- file.path(raw_data_path, "Community Data Village wise -29-4-25")
+
 
 
 # ---- CSV Reader -------------------------------------------------------------
@@ -296,13 +297,17 @@ final_cleaned <- final %>%
     mutate(across(
         all_of(cols_to_clean),
         ~ case_when(
-            tolower(trimws(.))  == "nil" ~ 0,
-            tolower(trimws(.))  == "Nil" ~ 0,
-            tolower(trimws(.))  == "Nill" ~ 0,
+            tolower(trimws(.)) == "nil" ~ 0,
+            tolower(trimws(.)) == "n.a." ~ NA_real_,
             grepl("^-?\\d+(\\.\\d+)?$", trimws(.)) ~ as.numeric(trimws(.)),
             TRUE ~ NA_real_
         )
     ))
 
-write.csv(final, "C:/Users/Admin/Box/2. Projects/11. PR&DW/9. Cleaned Data/gramodaya/community_cleaned_excel.csv")
+
+
+# ---- Write to CSV ----------------------------------------------------------
+
+write.csv(final_cleaned, file.path(data_cleaned_path, "community_cleaned.csv"), row.names = FALSE)
+
 
