@@ -304,6 +304,54 @@ final_cleaned <- final %>%
         )
     ))
 
+#---further cleaning-----------------------------------------------------------
+library(dplyr)
+library(stringr)
+
+clean_data <- function(df) {
+    # Columns to clean as numeric with special rules
+    numeric_cols <- c("q15_AGRI_solar_pumps", "q21_HLTH_health_workers_sanctioned", "q22_HLTH_health_workers_present", "q5_PRDW_pipe_water_supply", "q18_EDU_teachers_sanctioned", "q19_EDU_teachers_present")
+    
+    # Clean numeric_cols
+    for (col in numeric_cols) {
+        df[[col]] <- as.character(df[[col]])  # convert to character to check text values
+        
+        df[[col]] <- sapply(df[[col]], function(x) {
+            x_trim <- str_trim(tolower(x))
+            
+            if (x_trim %in% c("nil", "no")) {
+                return(0)
+            } else if (grepl("^[0-9.]+$", x_trim)) {
+                # valid numeric string
+                return(as.numeric(x_trim))
+            } else {
+                return(NA_real_)
+            }
+        })
+    }
+    
+    # Columns q32 and q34 logic to ensure names are registered as 1
+    for (col in c("q32_WCD_aw_workers_position", "q34_WCD_aw_helpers_position")) {
+        df[[col]] <- as.character(df[[col]])
+        
+        df[[col]] <- sapply(df[[col]], function(x) {
+            # if length > 4 letters -> 1
+            if (nchar(x) > 4) {
+                return(1)
+            } else if (grepl("^[0-9]+$", x)) {
+                # numeric string (only digits)
+                return(as.numeric(x))
+            } else {
+                return(NA_real_)
+            }
+        })
+    }
+    
+    return(df)
+}
+
+# Usage example:
+# cleaned_df <- clean_data(your_dataframe)
 
 
 # ---- Write to CSV ----------------------------------------------------------

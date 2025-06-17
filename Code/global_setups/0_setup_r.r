@@ -15,7 +15,7 @@ user_settings <- list(
         github = "/Users/nikileshanusha/repositories/gramodaya"
     ),
     Admin = list( # Admin refers to aastha
-        box = "C:/Users/Admin/Box/11. PR&DW",
+        box = "C:/Users/Admin/Box/2. Projects/11. PR&DW",
         github = "C:/Users/Admin/OneDrive - University of Chicago IIC/Desktop/gramodaya"
     )
     # Add other users here if needed
@@ -31,11 +31,12 @@ github_path <- user_settings[[username]]$github
 
 ##### MASTER FILE PATHS ------------------------------------------------------------------
 code_path <- file.path(github_path, "Code")
-raw_data_path <- file.path(box_path, "7. Raw Data - Working/gramodaya")
+raw_data_path <- file.path(box_path, "7. Raw Data - Working/gramodaya/gramoday data on 06.06.2025")
 process_data_path <- file.path(box_path, "8. Analysis/gramodaya")
 data_temp_path <- file.path(process_data_path, "Temp")
 data_cleaned_path <- file.path(box_path, "9. Cleaned Data/gramodaya")
 output_path <- file.path(box_path, "10. Output")
+
 
 ### 0.2 Boilerplate ------------------------------------------------------------------
 # *ERASE TEMP
