@@ -35,7 +35,7 @@ raw_data_path <- file.path(box_path, "7. Raw Data - Working/gramodaya/gramoday d
 process_data_path <- file.path(box_path, "8. Analysis/gramodaya")
 data_temp_path <- file.path(process_data_path, "Temp")
 data_cleaned_path <- file.path(box_path, "9. Cleaned Data/gramodaya")
-output_path <- file.path(box_path, "10. Output")
+output_path <- file.path(box_path, "10. Output", "gramodaya", "data_outputs")
 
 ###### Sub Directories
 
