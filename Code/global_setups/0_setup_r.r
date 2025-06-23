@@ -35,8 +35,11 @@ raw_data_path <- file.path(box_path, "7. Raw Data - Working/gramodaya/gramoday d
 process_data_path <- file.path(box_path, "8. Analysis/gramodaya")
 data_temp_path <- file.path(process_data_path, "Temp")
 data_cleaned_path <- file.path(box_path, "9. Cleaned Data/gramodaya")
-output_path <- file.path(box_path, "10. Output")
+output_path <- file.path(box_path, "10. Output", "gramodaya", "data_outputs")
 
+###### Sub Directories
+
+gramodaya_village_path <- file.path(raw_data_path, "Community Data Village wise -29-4-25")
 
 ### 0.2 Boilerplate ------------------------------------------------------------------
 # *ERASE TEMP
@@ -61,7 +64,7 @@ if (length(temp_files_to_delete) > 0) {
 # *Load necessary packages
 packages <- c(
     "data.table", "haven", "languageserver", "dplyr", "readr", "stringr", "purrr", "janitor", "digest",
-    "summarytools" # add more packages as needed
+    "summarytools", "readxl", "tidyr", "gt", "kableExtra", "writexl", "openxlsx"
 )
 
 lapply(packages, function(pkg) {
