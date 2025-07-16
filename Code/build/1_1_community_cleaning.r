@@ -179,20 +179,20 @@ final[final == "--select--"] <- NA
 final [final == ""] <- NA
 
 # ---- Clean and Rename Columns -----------------------------------------------
-final <- final %>%
+final_cleaned <- final %>%
     
     # ---- Static Columns ----
 rename(
     q1_PRDW_community_centre = `Community.Centre.available`,
     q2_PRDW_shg_workshed = `Common.work.shed.for.Self.Help.Group..SHG..available`,
-    q3_PRDW_tubewell_count = `Number.of.functional.Tube.well`,
+    q3_PRDW_tubewell_count = `Requirement.of.Concrete.Roads.Length..in.meter.`,
     q5_PRDW_pipe_water_supply = `Number.of.Household.provided.pipe.water.supply`,
     q6_PRDW_playground = `Availability.of.Play.Ground.in.the.village`,
     q7_PRDW_solar_streetlights = `Coverage.of.functional.Solar.Street.Lights.in.the.village`,
     q8_PRDW_allweather_connectivity = `Availability.of.all.weather.connectivity.to.the.village`,
     q8b_PRDW_road_belongs_to = `If.yes.y`,
-    q9_PRDW_concrete_road_length = `Availability.of.Concrete.Roads.Length..in.meter.`,
-    q10_PRDW_concrete_road_requirement = `Requirement.of.Concrete.Roads.Length..in.meter.`,
+    q9_PRDW_concrete_road_length = `the.Road.Belongs.to`,
+    q10_PRDW_concrete_road_requirement = `Availability.of.Concrete.Roads.Length..in.meter.`,
     
     q11_FS_fair_price_shop = `Availability.of.Fair.Price.Shop.in.the.village`,
     
@@ -211,9 +211,6 @@ rename(
     q24_HLTH_ambulance = `Availability.of.Ambulance.Service.facility.in.the.village`,
     q25_HLTH_mobile_unit = `Availability.of.Mobile.Health.Units.in.the.village`,
     q26_HLTH_asha_worker = `Availability.of.ASHA.worker.within.the.habitation`,
-    
-    q27_ENRG_village_electrified = `Electrified_1`,
-    
     q28_STSC_residential_school = `Availability.of.Residential.School.in.the.GP`,
     q29_STSC_students_enrolled = `Number.of.students.enrolled.in.residential.school`,
     
@@ -222,13 +219,13 @@ rename(
     
     q35_FIN_AVAIL_bank = `Availability.of.Bank..Mini.Bank..Other.Bank.facility.in.the.GP.Village`,
     q35b_FIN_bank_name = `If.YES`,
-    q36_FIN_banking_correspondent = `Availability.of.Banking.correspondent`,
-    q37_FIN_micro_atm = `Availability.of.Micro.ATM.in.the.GP.Village`,
+    q36_FIN_banking_correspondent = `then.specify.the.Bank.Name`,
+    q37_FIN_micro_atm = `Availability.of.Banking.correspondent`,
     
     q38_IT_mobile_network_covered = `Whether.the.village.is.covered.under.mobile.network`,
     q39_IT_network_provider = `If.Yes`,
-    q40_IT_common_service_centre = `Availability.of.Common.Service.centre.in.the.village`,
-    q41_IT_mo_seva_kendra = `Availability.of.Mo.Seva.Kendra.in.the.village`,
+    q40_IT_common_service_centre = `then.provide.the.company.name`,
+    q41_IT_mo_seva_kendra = `Availability.of.Common.Service.centre.in.the.village`,
     
     q42_SPRT_sports_equipment = `Supply.of.Sports.equipment.by.Government.to.the.village`,
     
@@ -239,61 +236,57 @@ rename(
     q46_ENV_allweather_forest_road = `Availability.of.all.weather.connectivity.within.forest.connecting.habitation.and.village`,
     
     q47_HE_agniveer_coaching = `Is.there.any.Coaching.Camp.for.Agniveer`
-) %>%
+) 
+
+final_cleaned <- final_cleaned %>%
     
     # ---- SCHOOL VARIABLES (q16 / q17) ----
 rename_with(~ str_replace(.x, "^School\\.Name_(\\d+)$", "q16a_EDU_school_name_\\1"),
-            matches("^School\\.Name_\\d+$")) %>%
+            .cols = matches("^School\\.Name_\\d+$")) %>%
     rename_with(~ str_replace(.x, "^School\\.Type_(\\d+)$", "q16b_EDU_school_type_\\1"),
-                matches("^School\\.Type_\\d+$")) %>%
+                .cols = matches("^School\\.Type_\\d+$")) %>%
     rename_with(~ str_replace(.x, "^Number\\.of\\.functional\\.Toilet_(\\d+)$", "q16c_EDU_school_toilets_\\1"),
-                matches("^Number\\.of\\.functional\\.Toilet_\\d+$")) %>%
+                .cols = matches("^Number\\.of\\.functional\\.Toilet_\\d+$")) %>%
     rename_with(~ str_replace(.x, "^Whether\\.there\\.is\\.Kitchen\\.facility_(\\d+)$", "q17_EDU_school_kitchen_\\1"),
-                matches("^Whether\\.there\\.is\\.Kitchen\\.facility_\\d+$")) %>%
+                .cols = matches("^Whether\\.there\\.is\\.Kitchen\\.facility_\\d+$")) %>%
     
     # ---- ANGANWADI VARIABLES (q30) ----
 rename_with(~ str_replace(.x, "^Anganwadi\\.Centre\\.Name_(\\d+)$", "q30a_WCD_awc_name_\\1"),
-            matches("^Anganwadi\\.Centre\\.Name_\\d+$")) %>%
+            .cols = matches("^Anganwadi\\.Centre\\.Name_\\d+$")) %>%
     rename_with(~ str_replace(.x, "^Own\\.\\.\\.Rental\\.Building_(\\d+)$", "q30b_WCD_awc_building_type_\\1"),
-                matches("^Own\\.\\.\\.Rental\\.Building_\\d+$")) %>%
+                .cols = matches("^Own\\.\\.\\.Rental\\.Building_\\d+$")) %>%
     rename_with(~ str_replace(.x, "^Drinking\\.water\\.facility_(\\d+)$", "q30c_WCD_awc_drinking_water_\\1"),
-                matches("^Drinking\\.water\\.facility_\\d+$")) %>%
+                .cols = matches("^Drinking\\.water\\.facility_\\d+$")) %>%
     rename_with(~ str_replace(.x, "^Toilet\\.facility_(\\d+)$", "q30d_WCD_awc_toilet_\\1"),
-                matches("^Toilet\\.facility_\\d+$")) %>%
+                .cols = matches("^Toilet\\.facility_\\d+$")) %>%
     rename_with(~ str_replace(.x, "^Electrified_(\\d+)$", "q30e_WCD_awc_electrified_\\1"),
-                matches("^Electrified_\\d+$")) %>%
+                .cols = matches("^Electrified_\\d+$")) %>%
     rename_with(~ str_replace(.x, "^Kitchen\\.facility_(\\d+)$", "q30f_WCD_awc_kitchen_\\1"),
-                matches("^Kitchen\\.facility_\\d+$")) %>%
+                .cols = matches("^Kitchen\\.facility_\\d+$")) %>%
     rename_with(~ str_replace(.x, "^LPG\\.Connection_(\\d+)$", "q30g_WCD_awc_lpg_connection_\\1"),
-                matches("^LPG\\.Connection_\\d+$"))
-
+                .cols = matches("^LPG\\.Connection_\\d+$")) %>%
+    # ---- ENERGY VARIABLES (q27) ----
+    rename_with(~ str_replace(.x, "^hamlet\\_name_(\\d+)$", "q27a_energy_hamlet_name_\\1"),
+            .cols = matches("^hamlet\\_name_\\d+$")) %>%
+    rename_with(~ str_replace(.x, "^hamlet\\_energy\\_electrified_(\\d+)$", "q27b_energy_hamlet_electrified_\\1"),
+            .cols = matches("^hamlet\\_energy\\_electrified_\\d+$")) %>%
     
-final_cleaned <- final %>%
-    select(
-        -`type.of.bus.facility`,
-        -`then.specify.the.Bank.Name`,
-        -`Paramilitary.and.Police.Service`,
-        -`then.provide.the.company.name`
-    )
+    # ---- Drop Irrelevant Columns ----
+select(-c("Availability.of.Micro.ATM.in.the.GP.Village","Number.of.functional.Tube.well", "Paramilitary.and.Police.Service", "type.of.bus.facility", "Availability.of.Mo.Seva.Kendra.in.the.village"))
 
-# Manually specified numeric columns
+# ---- Columns to Clean (Numeric) ---------------------------------------------
+
 cols_to_clean <- c(
-    "q9_PRDW_concrete_road_length",
-    "q10_PRDW_concrete_road_requirement",
-    "q3_PRDW_tubewell_count",
-    "q5_PRDW_pipe_water_supply",
     "q15_AGRI_solar_pumps",
-    "q18_EDU_teachers_sanctioned",
-    "q19_EDU_teachers_present",
     "q21_HLTH_health_workers_sanctioned",
     "q22_HLTH_health_workers_present",
-    "q29_STSC_students_enrolled",
-    "q32_WCD_aw_workers_position",
-    "q34_WCD_aw_helpers_position"
+    "q5_PRDW_pipe_water_supply",
+    "q18_EDU_teachers_sanctioned",
+    "q19_EDU_teachers_present"
 )
 
 # Clean specified columns
-final_cleaned <- final %>%
+final_cleaned <- final_cleaned %>%
     mutate(across(
         all_of(cols_to_clean),
         ~ case_when(
@@ -305,57 +298,137 @@ final_cleaned <- final %>%
     ))
 
 #---further cleaning-----------------------------------------------------------
+
+# ---- Load Required Libraries ----
 library(dplyr)
 library(stringr)
 
+
 clean_data <- function(df) {
-    # Columns to clean as numeric with special rules
-    numeric_cols <- c("q15_AGRI_solar_pumps", "q21_HLTH_health_workers_sanctioned", "q22_HLTH_health_workers_present", "q5_PRDW_pipe_water_supply", "q18_EDU_teachers_sanctioned", "q19_EDU_teachers_present")
+    # Step 1: Remove known invalid placeholders across all columns
+    df <- df %>%
+        mutate(across(everything(), ~ ifelse(
+            str_to_lower(trimws(.)) %in% c("nil", "nill", "--select--"), NA, .)
+        ))
     
-    # Clean numeric_cols
+    # Step 2: Clean specific numeric columns
+    numeric_cols <- c(
+        "q15_AGRI_solar_pumps",
+        "q21_HLTH_health_workers_sanctioned",
+        "q22_HLTH_health_workers_present",
+        "q5_PRDW_pipe_water_supply",
+        "q18_EDU_teachers_sanctioned",
+        "q19_EDU_teachers_present"
+    )
+    
     for (col in numeric_cols) {
-        df[[col]] <- as.character(df[[col]])  # convert to character to check text values
-        
-        df[[col]] <- sapply(df[[col]], function(x) {
-            x_trim <- str_trim(tolower(x))
-            
-            if (x_trim %in% c("nil", "no")) {
-                return(0)
-            } else if (grepl("^[0-9.]+$", x_trim)) {
-                # valid numeric string
-                return(as.numeric(x_trim))
-            } else {
+        if (col %in% names(df)) {
+            df[[col]] <- as.character(df[[col]])
+            df[[col]] <- sapply(df[[col]], function(x) {
+                if (!is.na(x)) {
+                    x_trim <- str_trim(tolower(x))
+                    if (x_trim %in% c("nil","no")) {
+                        return(0)
+                    } else if (grepl("^[0-9.]+$", x_trim)) {
+                        return(as.numeric(x_trim))
+                    }
+                }
                 return(NA_real_)
-            }
-        })
+            })
+        }
     }
     
-    # Columns q32 and q34 logic to ensure names are registered as 1
+    # Step 3: Binary encode Anganwadi worker/helper columns
     for (col in c("q32_WCD_aw_workers_position", "q34_WCD_aw_helpers_position")) {
-        df[[col]] <- as.character(df[[col]])
-        
-        df[[col]] <- sapply(df[[col]], function(x) {
-            # if length > 4 letters -> 1
-            if (nchar(x) > 4) {
-                return(1)
-            } else if (grepl("^[0-9]+$", x)) {
-                # numeric string (only digits)
-                return(as.numeric(x))
-            } else {
+        if (col %in% names(df)) {
+            df[[col]] <- as.character(df[[col]])
+            df[[col]] <- sapply(df[[col]], function(x) {
+                if (!is.na(x)) {
+                    if (nchar(x) > 4) {
+                        return(1)
+                    } else if (grepl("^[0-9]+$", x)) {
+                        return(as.numeric(x))
+                    }
+                }
                 return(NA_real_)
-            }
-        })
+            })
+        }
     }
     
     return(df)
 }
 
-# Usage example:
-# cleaned_df <- clean_data(your_dataframe)
 
 
-# ---- Write to CSV ----------------------------------------------------------
+# ---- Apply the Cleaning Function -------------------------------------------
+final_cleaned <- clean_data(final_cleaned)
 
+# ----- Consolidate Wide Format Columns ----
+library(dplyr)
+library(purrr)
+
+# ---- Status Logic Function for YES/NO fields ----
+status_logic <- function(...) {
+  responses <- c(...)
+  yes_count <- sum(tolower(responses) == "yes", na.rm = TRUE)
+  no_count <- sum(tolower(responses) == "no", na.rm = TRUE)
+  valid_count <- yes_count + no_count
+  total_count <- length(responses)
+  
+  case_when(
+    yes_count == total_count & total_count > 0 ~ "Full",
+    yes_count > 0 & no_count > 0 ~ "Partial",
+    yes_count == 0 & no_count > 0 ~ "None",
+    valid_count == 0 ~ NA_character_,
+    TRUE ~ NA_character_
+  )
+}
+
+# ---- Define groups of wide-format YES/NO questions ----
+question_groups <- list(
+  q27_ENRG_electrification_status = "q27b_energy_hamlet_electrified_",
+  q30_WCD_awc_electrified_status  = "q30e_WCD_awc_electrified_",
+  q30_WCD_awc_toilet_status       = "q30d_WCD_awc_toilet_",
+  q30_WCD_awc_drinking_status     = "q30c_WCD_awc_drinking_water_",
+  q30_WCD_awc_kitchen_status      = "q30f_WCD_awc_kitchen_",
+  q30_WCD_awc_lpg_status          = "q30g_WCD_awc_lpg_connection_",
+  q17_EDU_school_kitchen_status   = "q17_EDU_school_kitchen_",
+  q16c_EDU_school_toilets_status  = "q16c_EDU_school_toilets_"
+)
+
+# ---- Optional: check for missing prefixes ----
+missing_prefixes <- names(question_groups)[
+  !sapply(question_groups, function(p) any(startsWith(names(final_cleaned), p)))
+]
+if (length(missing_prefixes) > 0) {
+  warning("These prefixes did not match any columns: ", paste(missing_prefixes, collapse = ", "))
+}
+
+# ---- Apply status logic with safe checks ----
+for (new_var in names(question_groups)) {
+  prefix <- question_groups[[new_var]]
+  relevant_cols <- select(final_cleaned, starts_with(prefix))
+  
+  if (ncol(relevant_cols) > 0) {
+    final_cleaned[[new_var]] <- pmap_chr(relevant_cols, status_logic)
+  } else {
+    warning(paste("No matching columns found for prefix:", prefix))
+    final_cleaned[[new_var]] <- NA_character_
+  }
+}
+
+
+# ---- Export Cleaned File ----
 write.csv(final_cleaned, file.path(data_cleaned_path, "community_cleaned.csv"), row.names = FALSE)
+
+# ---- Conversion of YES and NO to 1 and 0 ----
+final_cleaned <- final_cleaned %>%
+    mutate(across(starts_with("q"), ~ ifelse(tolower(trimws(.)) == "yes", 1, 
+                                             ifelse(tolower(trimws(.)) == "no", 0, .))))
+
+# ---- Export Scored Sheet --------------------------
+write.csv(final_cleaned, file.path(data_cleaned_path, "community_scored.csv"), row.names = FALSE)
+
+
 
 
