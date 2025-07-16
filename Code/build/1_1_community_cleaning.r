@@ -265,9 +265,14 @@ rename_with(~ str_replace(.x, "^Anganwadi\\.Centre\\.Name_(\\d+)$", "q30a_WCD_aw
                 .cols = matches("^Kitchen\\.facility_\\d+$")) %>%
     rename_with(~ str_replace(.x, "^LPG\\.Connection_(\\d+)$", "q30g_WCD_awc_lpg_connection_\\1"),
                 .cols = matches("^LPG\\.Connection_\\d+$")) %>%
+    # ---- ENERGY VARIABLES (q27) ----
+    rename_with(~ str_replace(.x, "^hamlet\\_name_(\\d+)$", "q27a_energy_hamlet_name_\\1"),
+            .cols = matches("^hamlet\\_name_\\d+$")) %>%
+    rename_with(~ str_replace(.x, "^hamlet\\_energy\\_electrified_(\\d+)$", "q27b_energy_hamlet_electrified_\\1"),
+            .cols = matches("^hamlet\\_energy\\_electrified_\\d+$")) %>%
     
     # ---- Drop Irrelevant Columns ----
-select(-c("Number.of.functional.Tube.well", "Paramilitary.and.Police.Service", "type.of.bus.facility"))
+select(-c("Availability.of.Micro.ATM.in.the.GP.Village","Number.of.functional.Tube.well", "Paramilitary.and.Police.Service", "type.of.bus.facility", "Availability.of.Mo.Seva.Kendra.in.the.village"))
 
 # ---- Columns to Clean (Numeric) ---------------------------------------------
 
@@ -353,10 +358,77 @@ clean_data <- function(df) {
     return(df)
 }
 
+
+
 # ---- Apply the Cleaning Function -------------------------------------------
 final_cleaned <- clean_data(final_cleaned)
 
-# ---- (Optional) Export Cleaned File ----
+# ----- Consolidate Wide Format Columns ----
+library(dplyr)
+library(purrr)
+
+# ---- Status Logic Function for YES/NO fields ----
+status_logic <- function(...) {
+  responses <- c(...)
+  yes_count <- sum(tolower(responses) == "yes", na.rm = TRUE)
+  no_count <- sum(tolower(responses) == "no", na.rm = TRUE)
+  valid_count <- yes_count + no_count
+  total_count <- length(responses)
+  
+  case_when(
+    yes_count == total_count & total_count > 0 ~ "Full",
+    yes_count > 0 & no_count > 0 ~ "Partial",
+    yes_count == 0 & no_count > 0 ~ "None",
+    valid_count == 0 ~ NA_character_,
+    TRUE ~ NA_character_
+  )
+}
+
+# ---- Define groups of wide-format YES/NO questions ----
+question_groups <- list(
+  q27_ENRG_electrification_status = "q27b_energy_hamlet_electrified_",
+  q30_WCD_awc_electrified_status  = "q30e_WCD_awc_electrified_",
+  q30_WCD_awc_toilet_status       = "q30d_WCD_awc_toilet_",
+  q30_WCD_awc_drinking_status     = "q30c_WCD_awc_drinking_water_",
+  q30_WCD_awc_kitchen_status      = "q30f_WCD_awc_kitchen_",
+  q30_WCD_awc_lpg_status          = "q30g_WCD_awc_lpg_connection_",
+  q17_EDU_school_kitchen_status   = "q17_EDU_school_kitchen_",
+  q16c_EDU_school_toilets_status  = "q16c_EDU_school_toilets_"
+)
+
+# ---- Optional: check for missing prefixes ----
+missing_prefixes <- names(question_groups)[
+  !sapply(question_groups, function(p) any(startsWith(names(final_cleaned), p)))
+]
+if (length(missing_prefixes) > 0) {
+  warning("These prefixes did not match any columns: ", paste(missing_prefixes, collapse = ", "))
+}
+
+# ---- Apply status logic with safe checks ----
+for (new_var in names(question_groups)) {
+  prefix <- question_groups[[new_var]]
+  relevant_cols <- select(final_cleaned, starts_with(prefix))
+  
+  if (ncol(relevant_cols) > 0) {
+    final_cleaned[[new_var]] <- pmap_chr(relevant_cols, status_logic)
+  } else {
+    warning(paste("No matching columns found for prefix:", prefix))
+    final_cleaned[[new_var]] <- NA_character_
+  }
+}
+
+
+# ---- Export Cleaned File ----
 write.csv(final_cleaned, file.path(data_cleaned_path, "community_cleaned.csv"), row.names = FALSE)
+
+# ---- Conversion of YES and NO to 1 and 0 ----
+final_cleaned <- final_cleaned %>%
+    mutate(across(starts_with("q"), ~ ifelse(tolower(trimws(.)) == "yes", 1, 
+                                             ifelse(tolower(trimws(.)) == "no", 0, .))))
+
+# ---- Export Scored Sheet --------------------------
+write.csv(final_cleaned, file.path(data_cleaned_path, "community_scored.csv"), row.names = FALSE)
+
+
 
 
